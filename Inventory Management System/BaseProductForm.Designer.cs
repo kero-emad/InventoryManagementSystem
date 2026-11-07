@@ -1,0 +1,99 @@
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace Inventory_Management_System
+{
+    public partial class BaseProductForm
+    {
+        private System.ComponentModel.IContainer components = null;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && components != null)
+                components.Dispose();
+
+            base.Dispose(disposing);
+        }
+
+        private void InitializeComponent()
+        {
+            txtProductName = new TextBox();
+            txtDescription = new TextBox();
+            txtQuantity = new TextBox();
+            txtMinimumStockLevel = new TextBox();
+            txtPrice = new TextBox();
+            cmbCategory = new ComboBox();
+            cmbSupplier = new ComboBox();
+            btnCancel = new Button();
+
+            SuspendLayout();
+            AddLabel("Product Name", 42, 24);
+            AddLabel("Description", 45, 63);
+            AddLabel("Quantity", 48, 109);
+            AddLabel("Minimum Stock", 48, 157);
+            AddLabel("Price", 51, 198);
+            AddLabel("Category", 48, 241);
+            AddLabel("Supplier", 51, 284);
+
+            ConfigureTextBox(txtProductName, 235, 21, 6);
+            ConfigureTextBox(txtDescription, 235, 63, 7);
+            txtDescription.Multiline = true;
+            ConfigureTextBox(txtQuantity, 235, 109, 8);
+            ConfigureTextBox(txtMinimumStockLevel, 235, 157, 9);
+            ConfigureTextBox(txtPrice, 235, 198, 10);
+            ConfigureComboBox(cmbCategory, 235, 241, 11);
+            ConfigureComboBox(cmbSupplier, 235, 284, 12);
+
+            btnCancel.Location = new Point(345, 350);
+            btnCancel.Name = "btnCancel";
+            btnCancel.Size = new Size(100, 32);
+            btnCancel.TabIndex = 13;
+            btnCancel.Text = "Cancel";
+            btnCancel.UseVisualStyleBackColor = true;
+            btnCancel.FlatStyle = FlatStyle.Flat;
+            btnCancel.Click += btnCancel_Click;
+            Controls.Add(btnCancel);
+
+            ClientSize = new Size(600, 430);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(245, 247, 250);
+            Font = new Font("Segoe UI", 9F);
+            StartPosition = FormStartPosition.CenterParent;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            ResumeLayout(false);
+            PerformLayout();
+        }
+
+        private void AddLabel(string text, int x, int y)
+        {
+            Label label = new Label
+            {
+                AutoSize = true,
+                Location = new Point(x, y),
+                Text = text,
+                ForeColor = Color.FromArgb(45, 55, 72)
+            };
+            Controls.Add(label);
+        }
+
+        private void ConfigureTextBox(TextBox textBox, int x, int y, int tabIndex)
+        {
+            textBox.Location = new Point(x, y);
+            textBox.Size = new Size(250, 24);
+            textBox.TabIndex = tabIndex;
+            textBox.BorderStyle = BorderStyle.FixedSingle;
+            Controls.Add(textBox);
+        }
+
+        private void ConfigureComboBox(ComboBox comboBox, int x, int y, int tabIndex)
+        {
+            comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBox.FormattingEnabled = true;
+            comboBox.Location = new Point(x, y);
+            comboBox.Size = new Size(250, 24);
+            comboBox.TabIndex = tabIndex;
+            comboBox.FlatStyle = FlatStyle.Flat;
+            Controls.Add(comboBox);
+        }
+    }
+}

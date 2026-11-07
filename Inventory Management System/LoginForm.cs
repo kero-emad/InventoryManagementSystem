@@ -1,0 +1,64 @@
+﻿using System;
+using Inventory_Management_System.DataAccess;
+using Inventory_Management_System.Models;
+using System;
+using System.Windows.Forms;
+
+namespace Inventory_Management_System
+{
+    public partial class LoginForm : Form
+    {
+        private readonly UserRepository _userRepository;
+
+        public LoginForm()
+        {
+            InitializeComponent();
+            _userRepository = new UserRepository();
+        }
+
+        private void btnLogin_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                User user = _userRepository.Authenticate(
+                    txtUsername.Text,
+                    txtPassword.Text);
+
+                if (user == null)
+                {
+                    MessageBox.Show(
+                        "Invalid username or password.",
+                        "Login failed",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    txtPassword.SelectAll();
+                    txtPassword.Focus();
+                    return;
+                }
+
+                AuthSession.CurrentUser = user;
+                Hide();
+
+                using (ProductsForm productsForm = new ProductsForm())
+                {
+                    productsForm.ShowDialog();
+                }
+
+                Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Unable to sign in: " + ex.Message,
+                    "Login error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnExit_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+    }
+}

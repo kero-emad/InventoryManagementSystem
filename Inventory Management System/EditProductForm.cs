@@ -1,0 +1,65 @@
+using Inventory_Management_System.DataAccess;
+using Inventory_Management_System.Models;
+using System;
+using System.Windows.Forms;
+
+namespace Inventory_Management_System
+{
+    public partial class EditProductForm : BaseProductForm
+    {
+        private readonly ProductRepository _productRepository;
+        private readonly Product _product;
+
+        public EditProductForm(Product product)
+        {
+            InitializeComponent();
+
+            _productRepository = new ProductRepository();
+            _product = product;
+            LoadProductData();
+            btnSave.Click += btnSave_Click;
+        }
+
+        private void LoadProductData()
+        {
+            txtProductName.Text = _product.ProductName;
+            txtDescription.Text = _product.Description;
+            txtQuantity.Text = _product.QuantityInStock.ToString();
+            txtMinimumStockLevel.Text = _product.MinimumStockLevel.ToString();
+            txtPrice.Text = _product.Price.ToString();
+            cmbCategory.SelectedValue = _product.CategoryId;
+            cmbSupplier.SelectedValue = _product.SupplierId;
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            if (!ValidateProductData())
+                return;
+
+            try
+            {
+                Product updatedProduct = GetProductFromForm();
+                updatedProduct.ProductId = _product.ProductId;
+
+                if (_productRepository.Update(updatedProduct))
+                {
+                    MessageBox.Show(
+                        "Product updated successfully!",
+                        "Success",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                    DialogResult = DialogResult.OK;
+                    Close();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Failed to update product: " + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+    }
+}

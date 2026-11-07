@@ -1,0 +1,57 @@
+﻿using Inventory_Management_System.DataAccess;
+using Inventory_Management_System.Models;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Inventory_Management_System
+{
+    public partial class ProductsForm : Form
+    {
+        private readonly ProductRepository _productRepository;
+        public ProductsForm()
+        {
+            InitializeComponent();
+            _productRepository = new ProductRepository();
+            LoadProducts();
+            btnAdd.Click += btnAdd_Click;
+        }
+        private void LoadProducts()
+        {
+            try
+            {
+                List<Product> products =
+                    _productRepository.GetAll();
+
+                dgvProducts.DataSource = products;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Failed to load products: " + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            using (AddProductForm addForm = new AddProductForm())
+            {
+                if (addForm.ShowDialog() == DialogResult.OK)
+                {
+                    LoadProducts();
+                }
+            }
+        }
+
+    }
+}

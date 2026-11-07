@@ -1,0 +1,150 @@
+﻿using Inventory_Management_System.DataAccess;
+using Inventory_Management_System.Models;
+using Inventory_Management_System.DataAccess;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Inventory_Management_System
+{
+    public partial class ProductsForm : Form
+    {
+        private readonly ProductRepository _productRepository;
+        public ProductsForm()
+        {
+            InitializeComponent();
+            _productRepository = new ProductRepository();
+            LoadProducts();
+            btnAdd.Click += btnAdd_Click;
+            dgvProducts.CellContentClick += dgvProducts_CellContentClick;
+        }
+        private void LoadProducts()
+        {
+            try
+            {
+                List<Product> products =
+                    _productRepository.GetAll();
+
+                dgvProducts.DataSource = products;
+                AddActionColumns();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Failed to load products: " + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+
+        private void AddActionColumns()
+        {
+            if (dgvProducts.Columns["Edit"] == null)
+            {
+                DataGridViewButtonColumn editColumn =
+                    new DataGridViewButtonColumn
+                    {
+                        Name = "Edit",
+                        HeaderText = "Edit",
+                        Text = "Edit",
+                        UseColumnTextForButtonValue = true
+                    };
+
+                dgvProducts.Columns.Add(editColumn);
+            }
+
+            if (dgvProducts.Columns["Delete"] == null)
+            {
+                DataGridViewButtonColumn deleteColumn =
+                    new DataGridViewButtonColumn
+                    {
+                        Name = "Delete",
+                        HeaderText = "Delete",
+                        Text = "Delete",
+                        UseColumnTextForButtonValue = true
+                    };
+
+                dgvProducts.Columns.Add(deleteColumn);
+            }
+        }
+
+        private void dgvProducts_CellContentClick(
+            object sender,
+            DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0)
+                return;
+
+            Product product = dgvProducts.Rows[e.RowIndex].DataBoundItem as Product;
+            if (product == null)
+                return;
+
+            if (dgvProducts.Columns[e.ColumnIndex].Name == "Edit")
+            {
+                using (EditProductForm editForm =
+                       new EditProductForm(product))
+                {
+                    if (editForm.ShowDialog() == DialogResult.OK)
+                        LoadProducts();
+                }
+            }
+            else if (dgvProducts.Columns[e.ColumnIndex].Name == "Delete")
+            {
+                DeleteProduct(product);
+            }
+        }
+
+        private void DeleteProduct(Product product)
+        {
+            DialogResult result = MessageBox.Show(
+                "Are you sure you want to delete this product?",
+                "Confirm Delete",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning);
+
+            if (result != DialogResult.Yes)
+                return;
+
+            try
+            {
+                if (_productRepository.Delete(product.ProductId))
+                {
+                    MessageBox.Show(
+                        "Product deleted successfully.",
+                        "Success",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                    LoadProducts();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Failed to delete product: " + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            using (AddProductForm addForm = new AddProductForm())
+            {
+                if (addForm.ShowDialog() == DialogResult.OK)
+                {
+                    LoadProducts();
+                }
+            }
+        }
+
+    }
+}

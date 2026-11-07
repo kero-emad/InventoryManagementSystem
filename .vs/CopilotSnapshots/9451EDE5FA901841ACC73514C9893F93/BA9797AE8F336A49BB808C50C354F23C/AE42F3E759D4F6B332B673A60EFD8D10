@@ -1,0 +1,173 @@
+﻿using Inventory_Management_System.DataAccess;
+using Inventory_Management_System.Models;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Inventory_Management_System
+{
+    public partial class AddProductForm : Form
+    {
+        private readonly ProductRepository _productRepository;
+        private readonly CategoryRepository _categoryRepository;
+        private readonly SupplierRepository _supplierRepository;
+
+        public AddProductForm()
+        {
+            InitializeComponent();
+
+            _productRepository = new ProductRepository();
+            _categoryRepository = new CategoryRepository();
+            _supplierRepository = new SupplierRepository();
+
+            btnSave.Click += btnSave_Click;
+            btnCancel.Click += btnCancel_Click;
+
+            LoadCategories();
+            LoadSuppliers();
+        }
+
+        private void LoadCategories()
+        {
+            try
+            {
+                List<Category> categories =
+                    _categoryRepository.GetAll();
+
+                cmbCategory.DataSource = categories;
+                cmbCategory.DisplayMember = "CategoryName";
+                cmbCategory.ValueMember = "CategoryId";
+                cmbCategory.SelectedIndex = -1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Failed to load categories: " + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+        }
+
+        private void LoadSuppliers()
+        {
+            try
+            {
+                List<Supplier> suppliers =
+                    _supplierRepository.GetAll();
+
+                cmbSupplier.DataSource = suppliers;
+                cmbSupplier.DisplayMember = "SupplierName";
+                cmbSupplier.ValueMember = "SupplierId";
+                cmbSupplier.SelectedIndex = -1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Failed to load suppliers: " + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(txtProductName.Text))
+            {
+                MessageBox.Show("Product name is required.");
+                txtProductName.Focus();
+                return;
+            }
+            if (!int.TryParse(txtQuantity.Text, out int quantity)
+                || quantity < 0)
+            {
+                MessageBox.Show(
+                    "Please enter a valid non-negative quantity.");
+                txtQuantity.Focus();
+                return;
+            }
+
+            if (!decimal.TryParse(txtPrice.Text, out decimal price)
+                || price < 0)
+            {
+                MessageBox.Show(
+                    "Please enter a valid non-negative price.");
+                txtPrice.Focus();
+                return;
+            }
+            if (cmbCategory.SelectedValue == null)
+            {
+                MessageBox.Show("Please select a category.");
+                cmbCategory.Focus();
+                return;
+            }
+            if (cmbSupplier.SelectedValue == null)
+            {
+                MessageBox.Show("Please select a supplier.");
+                cmbSupplier.Focus();
+                return;
+            }
+
+            try
+            {
+                Product product = new Product
+                {
+                    ProductName = txtProductName.Text.Trim(),
+
+                    Description = string.IsNullOrWhiteSpace(
+                        txtDescription.Text)
+                        ? null
+                        : txtDescription.Text.Trim(),
+
+                    QuantityInStock = quantity,
+
+                    Price = price,
+
+                    CategoryId = Convert.ToInt32(
+                        cmbCategory.SelectedValue),
+
+                    SupplierId = Convert.ToInt32(
+                        cmbSupplier.SelectedValue)
+                };
+
+                int newProductId =
+                    _productRepository.Add(product);
+
+                MessageBox.Show(
+                    "Product added successfully!\nProduct ID: "
+                    + newProductId,
+                    "Success",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Failed to add product: " + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            this.DialogResult = DialogResult.Cancel;
+            this.Close();
+        }
+    }
+}

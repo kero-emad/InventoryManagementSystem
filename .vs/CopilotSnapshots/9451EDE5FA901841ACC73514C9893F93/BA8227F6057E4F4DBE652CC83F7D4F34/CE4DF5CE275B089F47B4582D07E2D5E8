@@ -1,0 +1,207 @@
+﻿using Inventory_Management_System.DataAccess;
+using Inventory_Management_System.Models;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Windows.Forms;
+
+namespace Inventory_Management_System
+{
+    public class BaseProductForm : Form
+    {
+        protected TextBox txtProductName;
+        protected TextBox txtDescription;
+        protected TextBox txtQuantity;
+        protected TextBox txtPrice;
+        protected ComboBox cmbCategory;
+        protected ComboBox cmbSupplier;
+        protected Button btnCancel;
+
+        private readonly CategoryRepository _categoryRepository;
+        private readonly SupplierRepository _supplierRepository;
+
+        protected BaseProductForm()
+        {
+            _categoryRepository = new CategoryRepository();
+            _supplierRepository = new SupplierRepository();
+
+            InitializeComponent();
+            LoadCategories();
+            LoadSuppliers();
+        }
+
+        protected void LoadCategories()
+        {
+            try
+            {
+                List<Category> categories = _categoryRepository.GetAll();
+                cmbCategory.DataSource = categories;
+                cmbCategory.DisplayMember = "CategoryName";
+                cmbCategory.ValueMember = "CategoryId";
+                cmbCategory.SelectedIndex = -1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Failed to load categories: " + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        protected void LoadSuppliers()
+        {
+            try
+            {
+                List<Supplier> suppliers = _supplierRepository.GetAll();
+                cmbSupplier.DataSource = suppliers;
+                cmbSupplier.DisplayMember = "SupplierName";
+                cmbSupplier.ValueMember = "SupplierId";
+                cmbSupplier.SelectedIndex = -1;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Failed to load suppliers: " + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
+        }
+
+        protected bool ValidateProductData()
+        {
+            if (string.IsNullOrWhiteSpace(txtProductName.Text))
+            {
+                MessageBox.Show("Product name is required.");
+                txtProductName.Focus();
+                return false;
+            }
+
+            if (!int.TryParse(txtQuantity.Text, out int quantity) || quantity < 0)
+            {
+                MessageBox.Show("Please enter a valid non-negative quantity.");
+                txtQuantity.Focus();
+                return false;
+            }
+
+            if (!decimal.TryParse(txtPrice.Text, out decimal price) || price < 0)
+            {
+                MessageBox.Show("Please enter a valid non-negative price.");
+                txtPrice.Focus();
+                return false;
+            }
+
+            if (cmbCategory.SelectedValue == null)
+            {
+                MessageBox.Show("Please select a category.");
+                cmbCategory.Focus();
+                return false;
+            }
+
+            if (cmbSupplier.SelectedValue == null)
+            {
+                MessageBox.Show("Please select a supplier.");
+                cmbSupplier.Focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        protected Product GetProductFromForm()
+        {
+            return new Product
+            {
+                ProductName = txtProductName.Text.Trim(),
+                Description = string.IsNullOrWhiteSpace(txtDescription.Text)
+                    ? null
+                    : txtDescription.Text.Trim(),
+                QuantityInStock = int.Parse(txtQuantity.Text),
+                Price = decimal.Parse(txtPrice.Text),
+                CategoryId = Convert.ToInt32(cmbCategory.SelectedValue),
+                SupplierId = Convert.ToInt32(cmbSupplier.SelectedValue)
+            };
+        }
+
+        private void InitializeComponent()
+        {
+            txtProductName = new TextBox();
+            txtDescription = new TextBox();
+            txtQuantity = new TextBox();
+            txtPrice = new TextBox();
+            cmbCategory = new ComboBox();
+            cmbSupplier = new ComboBox();
+            btnCancel = new Button();
+
+            SuspendLayout();
+
+            AddLabel("Product Name", 42, 24);
+            AddLabel("Description", 45, 63);
+            AddLabel("Quantity", 48, 109);
+            AddLabel("Price", 51, 157);
+            AddLabel("Category", 48, 198);
+            AddLabel("Supplier", 51, 241);
+
+            ConfigureTextBox(txtProductName, 235, 21, 6);
+            ConfigureTextBox(txtDescription, 235, 63, 7);
+            txtDescription.Multiline = true;
+            ConfigureTextBox(txtQuantity, 235, 109, 8);
+            ConfigureTextBox(txtPrice, 235, 157, 9);
+
+            ConfigureComboBox(cmbCategory, 235, 198, 10);
+            ConfigureComboBox(cmbSupplier, 235, 241, 11);
+
+            btnCancel.Location = new Point(301, 315);
+            btnCancel.Name = "btnCancel";
+            btnCancel.Size = new Size(75, 23);
+            btnCancel.TabIndex = 13;
+            btnCancel.Text = "Cancel";
+            btnCancel.UseVisualStyleBackColor = true;
+            btnCancel.Click += btnCancel_Click;
+            Controls.Add(btnCancel);
+
+            ClientSize = new Size(800, 450);
+            Name = "BaseProductForm";
+            AutoScaleMode = AutoScaleMode.Font;
+            ResumeLayout(false);
+            PerformLayout();
+        }
+
+        private void AddLabel(string text, int x, int y)
+        {
+            Label label = new Label
+            {
+                AutoSize = true,
+                Location = new Point(x, y),
+                Text = text
+            };
+            Controls.Add(label);
+        }
+
+        private void ConfigureTextBox(TextBox textBox, int x, int y, int tabIndex)
+        {
+            textBox.Location = new Point(x, y);
+            textBox.Size = new Size(100, 24);
+            textBox.TabIndex = tabIndex;
+            Controls.Add(textBox);
+        }
+
+        private void ConfigureComboBox(ComboBox comboBox, int x, int y, int tabIndex)
+        {
+            comboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBox.FormattingEnabled = true;
+            comboBox.Location = new Point(x, y);
+            comboBox.Size = new Size(121, 24);
+            comboBox.TabIndex = tabIndex;
+            Controls.Add(comboBox);
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+            Close();
+        }
+    }
+}
