@@ -94,16 +94,17 @@ The application uses a **hosted SQL Server database**, which is already configur
 
 
 
-## User Roles
+## Role Permissions
 
-| Feature                    |              Admin           |       Viewer         |
-| View Products              |               ✓              |         ✓           |
-| Search & Filter            |               ✓              |         ✓           |
-| Add Products               |               ✓              |         ✗           |
-| Edit Products              |               ✓              |         ✗           |
-| Delete Products            |               ✓              |         ✗           |
-| Manage Users               |               ✓              |         ✗           |
-| View Inventory Reports     |               ✓              |         ✓           |
+| Feature                  | Admin | Viewer |
+|--------------------------|:-----:|:------:|
+| View Products            |   ✓   |   ✓    |
+| Search & Filter          |   ✓   |   ✓    |
+| Add Products             |   ✓   |   ✗    |
+| Edit Products            |   ✓   |   ✗    |
+| Delete Products          |   ✓   |   ✗    |
+| Manage Users             |   ✓   |   ✗    |
+| View Inventory Reports   |   ✓   |   ✓    |
 
 ## Future Improvements
 
